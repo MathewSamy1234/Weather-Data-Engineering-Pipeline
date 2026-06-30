@@ -11,7 +11,7 @@ The final warehouse follows a dimensional modeling approach with a star schema a
 ---
 
 ## Architecture
-
+ ![img][docs/architetcure.png]
 Weather Events Dataset (CSV)
             │
             ▼
@@ -43,7 +43,7 @@ dim_date dim_location dim_weather_event
 Monthly   By State   By Type
 Analytics Analytics Analytics
 
-![img][architetcure.png]
+
 ## Technology Stack
 
 ### Data Storage
