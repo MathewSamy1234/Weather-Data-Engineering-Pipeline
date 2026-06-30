@@ -11,7 +11,7 @@ The final warehouse follows a dimensional modeling approach with a star schema a
 ---
 
 ## Architecture
- ![img][docs/architetcure.png]
+ ![img](docs/architetcure.png)
 Weather Events Dataset (CSV)
             │
             ▼
