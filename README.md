@@ -183,12 +183,7 @@ Foreign Keys:
 
 ## Star Schema
 
-```text
-                dim_date
-                    │
-                    │
-dim_location ── fact_weather_events ── dim_weather_event
-```
+![imsd](star_schema.png)
 
 ---
 
