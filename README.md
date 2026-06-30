@@ -43,9 +43,7 @@ dim_date dim_location dim_weather_event
  ▼          ▼          ▼
 Monthly   By State   By Type
 Analytics Analytics Analytics
-```
-
----
+![img][architetcure.png]
 
 ## Technology Stack
 
