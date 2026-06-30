@@ -42,8 +42,7 @@ The final warehouse follows a dimensional modeling approach with a star schema a
 ---
 
 ## Project Structure
-
-text
+```text
 weather-project
 │
 ├── airflow/
@@ -64,7 +63,7 @@ weather-project
 │
 └── docker-compose.yml
 
-
+```
 ---
 
 ## Data Pipeline
