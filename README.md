@@ -123,7 +123,7 @@ This table acts as the source for dbt transformations.
 ### Staging Layer
 
 #### stg_weather_events
-
+![img3](docs/lineage)
 Standardizes source data and prepares it for dimensional modeling.
 
 ---
@@ -209,7 +209,7 @@ Metrics:
 ### agg_weather_events_by_state
 
 Weather event analysis by state.
-
+![img234](docs/agg_by_state.png)
 Metrics:
 
 * Event Count
