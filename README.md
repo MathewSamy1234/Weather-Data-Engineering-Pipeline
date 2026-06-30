@@ -12,36 +12,6 @@ The final warehouse follows a dimensional modeling approach with a star schema a
 
 ## Architecture
  ![img](docs/architetcure.png)
-Weather Events Dataset (CSV)
-            │
-            ▼
-      Apache Airflow
-            │
-            ▼
-       HDFS Bronze
-            │
-            ▼
-      Apache Spark
-     Bronze → Silver
-            │
-            ▼
-      PostgreSQL
-   silver.weather_events
-            │
-            ▼
-            dbt
-            │
- ┌──────────┼──────────┐
- ▼          ▼          ▼
-dim_date dim_location dim_weather_event
- └──────────┼──────────┘
-            ▼
-   fact_weather_events
-            │
- ┌──────────┼──────────┐
- ▼          ▼          ▼
-Monthly   By State   By Type
-Analytics Analytics Analytics
 
 
 ## Technology Stack
