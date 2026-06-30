@@ -1,0 +1,13 @@
+weather_project:
+  target: dev
+
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      port: 5433
+      user: weather
+      password: weather
+      dbname: weather
+      schema: gold
+      threads: 4

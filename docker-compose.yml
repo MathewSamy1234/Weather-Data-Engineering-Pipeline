@@ -1,0 +1,211 @@
+version: "3"
+
+services:
+
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode-weather
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_webhdfs_enabled=true
+      - HDFS_CONF_dfs_namenode_rpc_bind_host=0.0.0.0
+      - HDFS_CONF_dfs_namenode_servicerpc_bind_host=0.0.0.0
+      - HDFS_CONF_dfs_namenode_http_bind_host=0.0.0.0
+      - HDFS_CONF_dfs_namenode_https_bind_host=0.0.0.0
+      - HDFS_CONF_dfs_client_use_datanode_hostname=true
+      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - namenode:/hadoop/dfs/name
+      - ./data:/tmp/data
+    networks:
+      - weather_data
+
+  datanode1:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode1-weather
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_client_use_datanode_hostname=true
+      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
+    depends_on:
+      - namenode
+    volumes:
+      - datanode1:/hadoop/dfs/data
+    networks:
+      - weather_data
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2-weather
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_client_use_datanode_hostname=true
+      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
+    depends_on:
+      - namenode
+    volumes:
+      - datanode2:/hadoop/dfs/data
+    networks:
+      - weather_data
+
+
+
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager-weather
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
+    ports:
+      - "8088:8088"
+    networks:
+      - weather_data
+
+  nodemanager1:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager1-weather
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
+    depends_on:
+      - resourcemanager
+    networks:
+      - weather_data
+
+  nodemanager2:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager2-weather
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
+    depends_on:
+      - resourcemanager
+    networks:
+      - weather_data
+
+  
+  spark-master:
+    image: apache/spark:3.5.0
+    container_name: spark-master-weather
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    environment:
+     - SPARK_MODE=master
+     - SPARK_MASTER_HOST=spark-master
+     - SPARK_LOCAL_IP=spark-master
+     - SPARK_DRIVER_HOST=spark-master
+     - SPARK_HADOOP_FS_DEFAULTFS=hdfs://namenode:9000
+    ports:
+      - "7077:7077"
+      - "8082:8080"
+    networks:
+      - weather_data
+    volumes:
+      - ./hadoop-conf:/etc/hadoop
+      - ./spark:/opt/spark/jobs
+      - ./jars/postgresql-42.7.11.jar:/opt/postgresql-42.7.11.jar
+    
+  spark-worker:
+    image: apache/spark:3.5.0
+    container_name: spark-worker-weather
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_HADOOP_FS_DEFAULTFS=hdfs://namenode:9000
+    networks:
+      - weather_data
+    volumes:
+      - ./hadoop-conf:/etc/hadoop
+      - ./jars/postgresql-42.7.11.jar:/opt/postgresql-42.7.11.jar
+  jupyter:
+    image: jupyter/pyspark-notebook:latest
+    container_name: jupyter-weather
+    ports:
+      - "8888:8888"
+    environment:
+      - PYSPARK_SUBMIT_ARGS=--master spark://spark-master:7077 pyspark-shell
+      - HADOOP_CONF_DIR=/etc/hadoop
+      - SPARK_HOME=/usr/local/spark
+    networks:
+      - weather_data
+
+  airflow:
+    image: apache/airflow:3.2.2
+    container_name: airflow-weather
+
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      _PIP_ADDITIONAL_REQUIREMENTS: apache-airflow-providers-apache-spark
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+     - ./airflow/dags:/opt/airflow/dags
+     - ./spark:/opt/airflow/spark_jobs
+     - "C:\\Users\\mathe\\OneDrive\\Desktop\\weather-project\\data:/opt/airflow/data"
+     
+     - /var/run/docker.sock:/var/run/docker.sock
+
+    command: standalone
+
+    networks:
+       - weather_data
+  airflow-postgres:
+    image: postgres:16
+    container_name: airflow-postgres-weather
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+
+    networks:
+      - weather_data
+  warehouse-postgres:
+    image: postgres:16
+    container_name: warehouse-postgres
+    environment:
+      POSTGRES_DB: weather
+      POSTGRES_USER: weather
+      POSTGRES_PASSWORD: weather
+    ports:
+      - "5433:5432"
+    volumes:
+      - warehouse_data:/var/lib/postgresql/data
+    networks:
+      - weather_data
+  dbt:
+   image: ghcr.io/dbt-labs/dbt-postgres:latest
+   container_name: dbt
+   working_dir: /usr/app
+
+   entrypoint: ["sh", "-c"]
+   command: "sleep infinity"
+
+   volumes:
+      - ./dbt:/usr/app
+
+   networks:
+      - weather_data
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: cloudbeaver
+    ports:
+     - "8978:8978"
+    networks:
+      - weather_data
+    depends_on:
+    - warehouse-postgres
+networks:
+  weather_data:
+    driver: bridge
+
+volumes:
+  namenode:
+  datanode1:
+  datanode2:
+  warehouse_data:

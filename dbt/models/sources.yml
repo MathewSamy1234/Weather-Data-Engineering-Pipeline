@@ -1,0 +1,9 @@
+sources:
+  - name: silver
+    database: weather  
+    schema: silver  
+    tables:
+      - name: weather_events
+      
+
+  

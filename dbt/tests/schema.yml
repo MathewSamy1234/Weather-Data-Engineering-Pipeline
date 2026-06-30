@@ -1,0 +1,14 @@
+models:
+  - name: dim_location
+    columns:
+      - name: location_id
+        tests:
+          - unique
+          - not_null
+
+  - name: fact_weather_events
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
