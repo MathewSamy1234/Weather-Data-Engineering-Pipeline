@@ -123,7 +123,7 @@ This table acts as the source for dbt transformations.
 ### Staging Layer
 
 #### stg_weather_events
-![img3](docs/lineage)
+![img3](docs/lineage.png)
 Standardizes source data and prepares it for dimensional modeling.
 
 ---
