@@ -183,7 +183,7 @@ Foreign Keys:
 
 ## Star Schema
 
-![imsd](star_schema.png)
+![imsd](docs/star_schema.png)
 
 ---
 
